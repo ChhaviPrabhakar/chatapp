@@ -9,14 +9,14 @@ const User = sequelize.define('user', {
         primaryKey: true
       },
 
-      username: Sequelize.STRING,
+      name: Sequelize.STRING,
 
       email: {
         type: Sequelize.STRING,
         unique: true
       },
 
-      mobile: Sequelize.NUMBER,
+      mobile: Sequelize.BIGINT,
     
       password: Sequelize.STRING
 });

@@ -11,17 +11,21 @@ function isStringInvalid(string) {
 
 exports.signup = (req, res, next) => {
     try {
-        const { username, email, mobile, password } = req.body;
+        const { name, email, mobile, password, confirmPassword } = req.body;
 
-        if (isStringInvalid(name) || isStringInvalid(email) || isStringInvalid(password)) {
+        if (isStringInvalid(name) || isStringInvalid(email) || isStringInvalid(mobile) || isStringInvalid(password)) {
             return res.status(400).json({ err: "Something is missing!" });
+        }
+
+        if(password !== confirmPassword) {
+            return res.status(401).json({ err: "Password does not match!" });
         }
 
         const saltRounds = 10;
         bcrypt.hash(password, saltRounds, async (err, hash) => {
             try {
                 const data = await User.create({
-                    username: username,
+                    name: name,
                     email: email,
                     mobile: mobile,
                     password: hash
