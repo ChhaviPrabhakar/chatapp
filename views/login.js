@@ -7,10 +7,11 @@ async function login(e) {
         }
 
         const response = await axios
-        .post('http://localhost:3000/user/login', loginDetails);
+            .post('http://localhost:3000/user/login', loginDetails);
+            localStorage.setItem('token', response.data.token);
     } catch (err) {
         console.log(JSON.stringify(err));
-        document.getElementById('errmsg').innerHTML = err.response.data.message;
+        document.getElementById('errmsg').innerHTML = err.response.data.err;
         document.body.innerHTML += `<div style="color:red;">${err.message} <div>`;
     }
 }
