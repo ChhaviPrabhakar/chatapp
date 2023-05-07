@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" type="text/css" href="signUp.css">
+</head>
+
+<body>
+    <div class="signup-container">
+        <h1>Log In</h1>
+        <p>Please enter your details to login.</p>
+        <hr>
+        <div id="errmsg"></div><br>
+        <form method="post" onsubmit="login(event)">
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" placeholder="Enter Email*" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="password-wrapper">
+                    <input type="password" id="password" placeholder="Set a password*" name="password" required>
+                    <span class="password-toggle" onclick="togglePasswordVisibility()">&#x1f441;</span>
+                </div>
+                <a href="./forgotPswd.html" class="forgotPswd">Forgot password?</a>
+            </div>
+            <button type="submit">LogIn</button>
+        </form>
+        <br>
+        <p class="link">New User- <a href="./signUp.html" style="color:dodgerblue">Sign Up</a>.</p>
+    </div>
+    <script>
+        function togglePasswordVisibility() {
+            const passwordFields = document.querySelectorAll('input[type="password"]');
+            passwordFields.forEach((field) => {
+                const toggle = field.parentElement.querySelector('.password-toggle');
+                if (field.type === "password") {
+                    field.type = "text";
+                    toggle.innerHTML = '&#x1f441;';
+                } else {
+                    field.type = "password";
+                    toggle.innerHTML = '&#x1f576;';
+                }
+            });
+        }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.1.3/axios.min.js"></script>
+    <script src="login.js"></script>
+</body>
+
+</html>
