@@ -1,4 +1,5 @@
 const Chat = require('../models/chat');
+const User = require('../models/user');
 
 exports.message = async (req, res, next) => {
     try {
@@ -12,14 +13,18 @@ exports.message = async (req, res, next) => {
     }
 };
 
+const { Op } = require('sequelize');
+
 exports.getChat = async (req, res, next) => {
     try {
+        const lastMsgId = req.query.lastMsgId;
+        console.log(lastMsgId);
 
-        const allChat = await Chat.findAll({ where: { userId: req.user.id }});
+        const allChat = await Chat.findAll({ where: { id: {[Op.gt]:lastMsgId} }, include : [ {model : User, attributes: ['name']} ] });
 
-            res.status(200).json({ allChat, success: true });
-        } catch (err) {
-            console.log(err);
-            return res.status(500).json({ success: false, err: err });
-        }
-    };
+        res.status(200).json({ allChat, success: true });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({ success: false, err: err });
+    }
+};

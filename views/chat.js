@@ -9,6 +9,8 @@ function parseJwt(token) {
 }
 
 const token = localStorage.getItem('token');
+let lastMsgId;
+
 
 async function sendText(e) {
     e.preventDefault();
@@ -26,16 +28,34 @@ async function sendText(e) {
     }
 };
 
-async function getChat () {
+async function getChat() {
     try {
+        let chatDetails = JSON.parse(localStorage.getItem('chatDetails'));
+        if (!chatDetails || !Array.isArray(chatDetails)) {
+            chatDetails = [];
+        }
+        if (chatDetails.length === 0) {
+            lastMsgId = -1;
+        } else {
+            lastMsgId = chatDetails[chatDetails.length - 1].id;
+        }
 
-        const response = await axios.get(`http://localhost:3000/chat/get-chat`, { headers: { "Authorization": token } });
+        const response = await axios.get(`http://localhost:3000/chat/get-chat?lastMsgId=${lastMsgId}`, { headers: { "Authorization": token } });
         const chatData = response.data.allChat;
+        console.log(chatData);
+
+        chatDetails.push(...chatData);
+
+        if(chatDetails.length > 10) {
+            chatDetails = chatDetails.slice(chatDetails.length - 10);
+        }
+
+        localStorage.setItem('chatDetails', JSON.stringify(chatDetails));
 
         let parentNode = document.getElementById('chats');
         parentNode.innerHTML = ''; // clear existing HTML content
 
-        chatData.forEach((chat) => {
+        chatDetails.forEach((chat) => {
             const decodeToken = parseJwt(token);
             const currentUser = decodeToken.userId;
             if (currentUser === chat.userId) {
@@ -49,11 +69,12 @@ async function getChat () {
     }
 };
 
+
 window.addEventListener('DOMContentLoaded', getChat());
 
-setInterval(async () => {
-    await getChat();
-}, 1000);
+// setInterval(async () => {
+//     await getChat();
+// }, 6000);
 
 function showOthersChatOnScreen(chat) {
     let parentNode = document.getElementById('chats');
