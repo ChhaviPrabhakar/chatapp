@@ -3,11 +3,11 @@ async function signup(e) {
 
     try {
         const signupDetails = {
-            username: e.target.username.value,
+            name: e.target.name.value,
             email: e.target.email.value,
             mobile: e.target.mobile.value,
             password: e.target.password.value,
-            confirmPassword: e.target.confirm - password.value
+            confirmPassword: e.target.confirmPassword.value
         }
 
         const response = await axios
@@ -16,7 +16,7 @@ async function signup(e) {
             window.location.href = "./login.html";
     } catch (err) {
         console.log(JSON.stringify(err));
-        document.getElementById('errmsg').innerHTML = err.response.data.message;
+        document.getElementById('errmsg').innerHTML = err.response.data.err;
         document.body.innerHTML += `<div style="color:red;">${err.message} <div>`;
     }
 }

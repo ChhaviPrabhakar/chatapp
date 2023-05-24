@@ -1,7 +1,7 @@
 const Sequelize = require('sequelize');
 const sequelize = require('../util/database');
 
-const Chat = sequelize.define('chat', {
+const GroupMembership = sequelize.define('groupMembership', {
     id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
@@ -9,10 +9,7 @@ const Chat = sequelize.define('chat', {
         primaryKey: true
     },
 
-    message: {
-        type: Sequelize.STRING,
-        allowNull: false
-    }
+    isAdmin: Sequelize.BOOLEAN
 });
 
-module.exports = Chat;
+module.exports = GroupMembership;

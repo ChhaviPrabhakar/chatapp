@@ -43,8 +43,8 @@ exports.signup = async (req, res, next) => {
     }
 };
 
-const generateAccessToken = (id) => {
-    return jwt.sign({ userId: id }, process.env.TOKEN_SECRET_KEY);
+const generateAccessToken = (id, name) => {
+    return jwt.sign({ userId: id, name}, process.env.TOKEN_SECRET_KEY);
 }
 
 exports.login = async (req, res, next) => {
@@ -62,7 +62,7 @@ exports.login = async (req, res, next) => {
                 if (err) {
                     throw new Error('Something went wrong!');
                 } else if (result === true) {
-                    res.status(200).json({ message: 'Successfully Logged in!', token: generateAccessToken(user[0].id) });
+                    res.status(200).json({ message: 'Successfully Logged in!', token: generateAccessToken(user[0].id, user[0].name) });
                 } else {
                     return res.status(401).json({ err: 'Password is incorrect!' });
                 }

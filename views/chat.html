@@ -5,20 +5,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Group Chat App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="chat.css">
 </head>
 
 <body>
     <div class="container">
         <div class="header">
+            <i class="fas fa-bars" id="hamburger"></i>
             <h1>Group Chat App</h1>
+        </div>
+        <div class="sidebar" id="sidebar">
+            <!-- sidebar content -->
+            <button id="create-group-btn">Create New Group</button>
+            <hr class="group-hr">
+            <ul class="group-list" id="groupNameList">Groups</ul>
         </div>
         <div class="chat-window">
             <div class="chat-header">
-                <h2>Chat Room</h2>
+                <h2>Public Chat Room</h2>
+                <button class="member-button" onclick="toggleDropdown()">Member</button>
+                <div class="dropdown" id="dropdown">
+                    <button class="exitGroupBtn">Exit this group</button>
+                    <button class="closeDropdown" onclick="closeDropdown()">x</button>
+                    <div class="searchInput">
+                        <input type="tel" class="input" id="mobile" name="mobile" maxlength="10"
+                            placeholder="Add people by their Phone no..." autocomplete="off" required>
+                        <input onclick="addMember()" class="button--add" value="Add" type="submit">
+                    </div>
+                    <ul id="member-list"></ul>
+                </div>
+            </div>
+            <div class="member-list">
+                <!-- Member list content goes here -->
             </div>
             <div class="chat-body">
-                <div class="message received">
+                <ul id="chats"></ul>
+                <!-- <div class="message received">
                     <div class="message-info">
                         <span class="message-sender">John</span>
                         <span class="message-time">10:30 AM</span>
@@ -35,17 +58,39 @@
                     <div class="message-text">
                         Hi John, thanks for creating this chat room.
                     </div>
-                </div>
+                </div> -->
             </div>
             <div class="chat-footer">
-                <form>
-                    <input type="text" placeholder="Type your message here...">
+                <form method="post" onsubmit="sendPublicText(event)">
+                    <input type="text" id="message" placeholder="Type your message here...">
                     <button type="submit"><i class="fas fa-paper-plane"></i></button>
                 </form>
             </div>
         </div>
+        <div class="box">
+            <div class="user-greeting">
+                Welcome, User!
+            </div>
+            <div class="actions">
+                <button class="back-button">Back to Public Chat</button>
+                <button class="logout-button">Logout</button>
+            </div>
+        </div>
+    </div>
+    <div class="popup">
+        <div class="popup-content">
+            <span class="close-btn">&times;</span>
+            <h3>Create New Group</h3>
+            <form class="popup-form">
+                <label class="popGrpName" for="group-name-input">Group Name:</label>
+                <input class="pop-input" type="text" id="group-name-input" required>
+                <button class="pop-btn" type="button" id="create-btn">Create</button>
+            </form>
+        </div>
     </div>
     <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.1.3/axios.min.js"></script>
+    <script src="chat.js"></script>
 </body>
 
 </html>
