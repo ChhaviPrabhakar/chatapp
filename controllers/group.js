@@ -11,7 +11,7 @@ exports.createGroups = async (req, res, next) => {
         res.status(201).json({ success: true, newGroup });
     } catch (err) {
         console.log(err);
-        res.status(500).json({ success: false, err: err });
+        return res.status(500).json({ success: false, err: err });
     }
 };
 
@@ -21,7 +21,7 @@ exports.getGroupList = async (req, res, next) => {
         res.status(200).json({ success: true, groupList });
     } catch (err) {
         console.log(err);
-        res.status(500).json({ success: false, err: err });
+        return res.status(500).json({ success: false, err: err });
     }
 };
 
@@ -31,19 +31,19 @@ exports.deleteGroup = async (req, res, next) => {
 
         const user = await GroupMembership.findOne({ where: { userId: req.user.id, groupId } });
         if (!user.isAdmin) {
-            res.status(401).json({ message: 'Only admins can delete the group!', success: false });
+            return res.status(401).json({ message: 'Only admins can delete the group!', success: false });
         }
 
-        const creator = await Group.findOne({ where: { createdBy: req.user.id } });
+        const creator = await Group.findOne({ where: { id: groupId, createdBy: req.user.id } });
         if (!creator) {
-            res.status(401).json({ message: 'Only creator can delete the group, you may "Exit this group"!', success: false });
+            return res.status(401).json({ message: 'Only creator can delete the group, you may "Exit this group"!', success: false });
         }
 
         const removedGroup = await Group.destroy({ where: { id: groupId } });
-        res.status(200).json({ removedGroup, message: 'Successfully deleted this group.', success: false });
+        res.status(200).json({ removedGroup, message: 'Successfully deleted this group.', success: true });
     } catch (err) {
         console.log(err);
-        res.status(500).json({ success: false, err: err });
+        return res.status(500).json({ success: false, err: err });
     }
 };
 
@@ -54,7 +54,7 @@ exports.getGroupChat = async (req, res, next) => {
         res.status(200).json({ success: true, grpChat });
     } catch (err) {
         console.log(err);
-        res.status(500).json({ success: false, err: err });
+        return res.status(500).json({ success: false, err: err });
     }
 };
 
@@ -86,7 +86,8 @@ exports.addMember = async (req, res, next) => {
             groupId: groupId,
             isAdmin: false
         });
-        res.status(200).json({ message: 'Member added to this group successfully.', newMember, success: true });
+        const newMemberWithName = { userId: member.id, name: member.name };
+        res.status(200).json({ message: 'Member added to this group successfully.', newMember, newMemberWithName, success: true });
 
     } catch (err) {
         console.log(err);
@@ -123,7 +124,7 @@ exports.getMembers = async (req, res, next) => {
         res.status(200).json({ membersWithNames, success: true });
     } catch (err) {
         console.log(err);
-        res.status(500).json({ err: err, success: false });
+        return res.status(500).json({ err: err, success: false });
     }
 }
 
@@ -131,27 +132,46 @@ exports.removeMember = async (req, res, next) => {
     try {
         const { userId, groupId } = req.query;
 
-        const isCreator = await Group.findOne({ where: { createdBy: userId } });
+        const isCreator = await Group.findOne({ where: { id: groupId, createdBy: userId } });
         if (isCreator) {
-            res.status(401).json({ message: `Can't remove the Creator of this group!`, success: false });
+            return res.status(401).json({ message: `Can't remove the Creator of this group!`, success: false });
         }
 
         const removedMember = await GroupMembership.destroy({ where: { userId: userId, groupId: groupId } });
         res.status(200).json({ removedMember, message: 'Successfully removedMember.', success: true });
     } catch (err) {
         console.log(err);
-        res.status(500).json({ err: err, success: false });
+        return res.status(500).json({ err: err, success: false });
     }
 };
 
 exports.makeAdmin = async (req, res, next) => {
     try {
         const { userId, groupId } = req.query;
-        console.log('grpId-->', groupId, userId);
+
         const newAdmin = await GroupMembership.update({ isAdmin: true }, { where: { userId: userId, groupId: groupId } });
+
         res.status(200).json({ newAdmin, message: 'Now this member is also admin.', success: true });
     } catch (err) {
         console.log(err);
-        res.status(500).json({ err: err, success: false });
+        return res.status(500).json({ err: err, success: false });
+    }
+}
+
+exports.removeAdmin = async (req, res, next) => {
+    try {
+        const { userId, groupId } = req.query;
+
+        const creator = await Group.findOne({ where: { id: groupId, createdBy: userId } });
+        if (creator) {
+            return res.status(401).json({ message: `You can't dismiss Creator as admin, because they created this group.`, success: false });
+        }
+
+        const removedAdmin = await GroupMembership.update({ isAdmin: false }, { where: { userId: userId, groupId: groupId } });
+
+        res.status(200).json({ removedAdmin, message: 'Now this member is no more admin.', success: true });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({ err: err, success: false });
     }
 }
