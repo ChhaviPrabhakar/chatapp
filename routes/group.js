@@ -12,5 +12,6 @@ router.post('/add-member', userAuth.authenticate, groupController.addMember);
 router.get('/get-member/:groupId', userAuth.authenticate, groupController.getMembers);
 router.delete('/remove-member', userAuth.authenticate, groupController.removeMember);
 router.post('/make-admin', userAuth.authenticate, groupController.makeAdmin);
+router.post('/remove-admin', userAuth.authenticate, groupController.removeAdmin);
 
 module.exports = router;

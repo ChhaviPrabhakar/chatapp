@@ -1,5 +1,12 @@
 const token = localStorage.getItem('token');
+const decodeToken = parseJwt(token);
+const currentUserId = decodeToken.userId;
+const currentUserName = decodeToken.name;
 let lastMsgId;
+
+// Update the content with the currentUserName variable
+const userGreetingElement = document.querySelector('.user-greeting');
+userGreetingElement.textContent = `Welcome, ${currentUserName}!`;
 
 //parsing JWT
 function parseJwt(token) {
@@ -79,9 +86,7 @@ async function getPublicChat() {
         parentNode.innerHTML = ''; // clear existing HTML content
 
         chatDetails.forEach((chat) => {
-            const decodeToken = parseJwt(token);
-            const currentUser = decodeToken.userId;
-            if (currentUser === chat.userId) {
+            if (currentUserId === chat.userId) {
                 showMyChatOnScreen(chat);
             } else {
                 showOthersChatOnScreen(chat);
@@ -211,12 +216,13 @@ async function deleteGroup(groupId) {
         if (confirm(`Are you sure want to delete this group?`)) {
             const response = await axios
                 .delete(`http://localhost:3000/groups/delete-group/${groupId}`, { headers: { "Authorization": token } });
-            alert(response.data.message);
+            showPopupMessage(response.data.message, response.data.success);
             document.getElementById('groupNameList').removeChild(document.getElementById(groupId));
             await backToPublicChat();
         }
     } catch (err) {
         console.log(err);
+        showPopupMessage(err.response.data.message, err.response.data.success);
     }
 }
 
@@ -244,9 +250,7 @@ async function getGroupChat(groupId, groupName) {
         const chatData = response.data.grpChat;
 
         chatData.forEach((chat) => {
-            const decodeToken = parseJwt(token);
-            const currentUser = decodeToken.userId;
-            if (currentUser === chat.userId) {
+            if (currentUserId === chat.userId) {
                 showMyChatOnScreen(chat);
             } else {
                 showOthersChatOnScreen(chat);
@@ -266,10 +270,12 @@ async function addMember() {
         const memberData = { mobNum: mobNum, groupId: groupId };
         const response = await axios
             .post('http://localhost:3000/groups/add-member', memberData, { headers: { "Authorization": token } });
+        showPopupMessage(response.data.message, response.data.success);
         document.getElementById('mobile').value = '';
         displayMemberListForAdmin(response.data.newMemberWithName);
     } catch (err) {
         console.log(err);
+        showPopupMessage(err.response.data.message, err.response.data.success);
     }
 }
 
@@ -282,9 +288,8 @@ async function getMembers() {
                 headers: { "Authorization": token }
             });
         const allMembers = response.data.membersWithNames;
-        const decodeToken = parseJwt(token);
-        const currentUser = decodeToken.userId;
-        const isAdminUser = allMembers.some(user => user.userId === currentUser && user.isAdmin);
+
+        const isAdminUser = allMembers.some(user => user.userId === currentUserId && user.isAdmin);
         if (isAdminUser) {
             allMembers.forEach(member => {
                 displayMemberListForAdmin(member);
@@ -300,15 +305,27 @@ async function getMembers() {
 }
 
 //remove members of the group
-async function removeMember(memberId) {
+async function removeMember(memberId, memberName) {
     try {
-        if (confirm(`Are you sure want to remove this member?`)) {
+        if (confirm(`Are you sure want to remove ${memberName} from this group?`)) {
             const groupId = JSON.parse(localStorage.getItem('groupData')).groupId;
             const response = await axios
                 .delete(`http://localhost:3000/groups/remove-member?userId=${memberId}&groupId=${groupId}`, { headers: { "Authorization": token } });
-            alert(response.data.message);
+            showPopupMessage(response.data.message, response.data.success);
             document.getElementById('member-list').removeChild(document.getElementById(memberId));
         }
+    } catch (err) {
+        console.log(err);
+        showPopupMessage(err.response.data.message, err.response.data.success);
+    }
+}
+
+//remove myself from group(exit group)
+async function exitGroup() {
+    try {
+        const currentUserIdName = 'yourself';
+        await removeMember(currentUserId, currentUserIdName);
+        await backToPublicChat();
     } catch (err) {
         console.log(err);
     }
@@ -320,7 +337,12 @@ async function makeAdmin(userId) {
         const groupId = JSON.parse(localStorage.getItem('groupData')).groupId;
         const response = await axios
             .post(`http://localhost:3000/groups/make-admin?userId=${userId}&groupId=${groupId}`, {}, { headers: { "Authorization": token } });
-        alert(response.data.message);
+        showPopupMessage(response.data.message, response.data.success);
+
+        // Update button text to "remove admin"
+        const button = document.getElementById(userId).querySelector('.btn1');
+        button.textContent = 'remove admin';
+        button.onclick = () => removeAdmin(userId);
     } catch (err) {
         console.log(err);
     }
@@ -333,10 +355,16 @@ async function removeAdmin(userId) {
             const groupId = JSON.parse(localStorage.getItem('groupData')).groupId;
             const response = await axios
                 .post(`http://localhost:3000/groups/remove-admin?userId=${userId}&groupId=${groupId}`, {}, { headers: { "Authorization": token } });
-            alert(response.data.message);
+            showPopupMessage(response.data.message, response.data.success);
+
+            // Update button text to "make admin"
+            const button = document.getElementById(userId).querySelector('.btn1');
+            button.textContent = 'make admin';
+            button.onclick = () => makeAdmin(userId);
         }
     } catch (err) {
         console.log(err);
+        showPopupMessage(err.response.data.message, err.response.data.success);
     }
 }
 
@@ -344,10 +372,10 @@ async function removeAdmin(userId) {
 function displayMemberListForAdmin(member) {
     let parentNode = document.getElementById('member-list');
     const decodeToken = parseJwt(token);
-    const currentUser = decodeToken.userId;
+    const currentUserId = decodeToken.userId;
     let childHTML = '';
 
-    if (member.userId === currentUser) {
+    if (member.userId === currentUserId) {
         childHTML = `<li>
         <div class="my-item">
           <span>Me (${member.name})</span>
@@ -362,7 +390,7 @@ function displayMemberListForAdmin(member) {
           <span>${member.name}</span>
           <div class="buttons-wrapper">
             <button class="btn1" onclick="removeAdmin('${member.userId}')">remove admin</button>
-            <button class="btn2" onclick="removeMember('${member.userId}')">x</button>
+            <button class="btn2" onclick="removeMember('${member.userId}', '${member.name}')">x</button>
           </div>
         </div>
       </li>`;
@@ -372,7 +400,7 @@ function displayMemberListForAdmin(member) {
           <span>${member.name}</span>
           <div class="buttons-wrapper">
             <button class="btn1" onclick="makeAdmin('${member.userId}')">make admin</button>
-            <button class="btn2" onclick="removeMember('${member.userId}')">x</button>
+            <button class="btn2" onclick="removeMember('${member.userId}', '${member.name}')">x</button>
           </div>
         </div>
       </li>`;
@@ -385,10 +413,10 @@ function displayMemberListForAdmin(member) {
 function displayMemberListForNonAdmin(member) {
     let parentNode = document.getElementById('member-list');
     const decodeToken = parseJwt(token);
-    const currentUser = decodeToken.userId;
+    const currentUserId = decodeToken.userId;
     let childHTML = '';
 
-    if (currentUser === member.userId) {
+    if (currentUserId === member.userId) {
         childHTML = `<li>
         <div class="my-item">
           <span>Me (${member.name})</span>
@@ -471,9 +499,23 @@ async function backToPublicChat() {
     }
 }
 
+//logout
 function logout() {
-    if (confirm('Are you sure want to Logut?')) {
+    if (confirm('Are you sure want to Logout?')) {
         localStorage.clear();
         return window.location.href = "./login.html";
     }
+}
+
+//showing popup for the response
+function showPopupMessage(message, success) {
+    const popup = document.createElement('div');
+    popup.textContent = message;
+    popup.classList.add('MsgPopup');
+    popup.classList.add(success ? 'success' : 'failure');
+    document.body.appendChild(popup);
+
+    setTimeout(() => {
+        popup.remove();
+    }, 2000);
 }

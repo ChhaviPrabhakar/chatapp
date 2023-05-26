@@ -10,8 +10,7 @@
 <body>
     <div class="signup-container">
         <h1>Create an Account</h1>
-        <p>Welcome to our - Chat App</p>
-        <p class="para">We provide you the best chatting experience!</p>
+        <p>Welcome to our - Group Chat App</p>
         <hr>
         <div id="errmsg"></div><br>
         <form method="post" onsubmit="signup(event)">
@@ -25,7 +24,8 @@
             </div>
             <div class="form-group">
                 <label for="mobile">Mobile Number</label>
-                <input type="tel" maxlength="10" id="mobile" placeholder="+91 - Enter Mobile Number*" name="mobile" required>
+                <input type="tel" maxlength="10" id="mobile" placeholder="+91 - Enter Mobile Number*" name="mobile"
+                    required>
             </div>
             <div class="form-group">
                 <label for="password">Password</label>
@@ -42,6 +42,10 @@
                     <span class="password-toggle" onclick="togglePasswordVisibility()">&#x1f441;</span>
                 </div>
             </div>
+            <!-- <label>
+                <input type="checkbox" checked="checked" name="remember" style="margin-bottom:1px"> Remember me
+            </label> -->
+            <p>By creating an account you agree to our <a href="#" style="color:dodgerblue">Terms & Privacy</a>.</p>
             <button type="submit">Sign Up</button>
         </form>
         <br>

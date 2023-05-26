@@ -7,6 +7,7 @@ const User = require('./models/user');
 const Chat = require('./models/chat');
 const Group = require('./models/group');
 const GroupMembership = require('./models/groupMembership');
+const ForgotPswd = require('./models/forgotPswd');
 
 const app = express();
 
@@ -26,6 +27,9 @@ Chat.belongsTo(User);
 
 Group.hasMany(Chat);
 Chat.belongsTo(Group);
+
+User.hasMany(ForgotPswd);
+ForgotPswd.belongsTo(User);
 
 User.belongsToMany(Group, { through: GroupMembership });
 Group.belongsToMany(User, { through: GroupMembership });
