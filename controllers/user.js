@@ -110,9 +110,9 @@ exports.forgotPswd = async (req, res, next) => {
                     subject: 'Reset your password',
                     sender,
                     to: recievers,
-                    // textContent: `Reset your password from this link :- http://3.92.199.165/:3000/user/resetpasssword/${id}`
+                    // textContent: `Reset your password from this link :- http://3.92.199.165:3000/user/resetpasssword/${id}`
                     htmlContent: `<h1>Reset your password from this link</h1>
-                	<a href="http://3.92.199.165/:3000/user/resetpassword/${id}">Reset password</a>`
+                	<a href="http://3.92.199.165:3000/user/resetpassword/${id}">Reset password</a>`
                     // params: {
                     //     role: 'frontend',
                     // },

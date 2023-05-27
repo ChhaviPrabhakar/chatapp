@@ -12,7 +12,7 @@ const ForgotPswd = require('./models/forgotPswd');
 
 const app = express();
 
-app.use(cors()); //{ origin: "http://3.92.199.165/:3000" }
+app.use(cors()); //{ origin: "http://3.92.199.165:3000" }
 app.use(express.json());
 
 const userRoutes = require('./routes/user');
