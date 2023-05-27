@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 
 const sequelize = require('./util/database');
+const path = require('path');
 
 const User = require('./models/user');
 const Chat = require('./models/chat');
@@ -21,6 +22,10 @@ const groupRoutes = require('./routes/group');
 app.use('/user', userRoutes);
 app.use('/chat', chatRoutes);
 app.use('/groups', groupRoutes);
+
+app.use((req, res) => {
+    res.sendFile(path.join(__dirname, `views/${req.url}`));
+});
 
 User.hasMany(Chat);
 Chat.belongsTo(User);
