@@ -7,7 +7,7 @@ async function forgot(e) {
 
     try {
         const response = await axios
-            .post('http://localhost:3000/user/forgotpassword', email);
+            .post('http://3.92.199.165/:3000/user/forgotpassword', email);
         alert(response.data.message);
     } catch (err) {
         console.log(JSON.stringify(err));

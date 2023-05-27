@@ -7,7 +7,7 @@ async function login(e) {
         }
 
         const response = await axios
-            .post('http://localhost:3000/user/login', loginDetails);
+            .post('http://3.92.199.165/:3000/user/login', loginDetails);
             localStorage.setItem('token', response.data.token);
             window.location.href = "./chat.html";
     } catch (err) {

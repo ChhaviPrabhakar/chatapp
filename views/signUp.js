@@ -11,7 +11,7 @@ async function signup(e) {
         }
 
         const response = await axios
-            .post('http://localhost:3000/user/signup', signupDetails);
+            .post('http://3.92.199.165/:3000/user/signup', signupDetails);
             alert(response.data.message);
             window.location.href = "./login.html";
     } catch (err) {

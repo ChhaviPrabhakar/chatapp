@@ -38,14 +38,14 @@ async function sendMessages(e) {
                 groupId: groupId
             }
             const response = await axios
-                .post('http://localhost:3000/chat/message', groupText, { headers: { "Authorization": token } });
+                .post('http://3.92.199.165/:3000/chat/message', groupText, { headers: { "Authorization": token } });
             showMyChatOnScreen(response.data.newMsgInGrp);
         } else { //otherwise sent to public chat
             const text = {
                 message: e.target.message.value
             }
             const response = await axios
-                .post('http://localhost:3000/chat/message', text, { headers: { "Authorization": token } });
+                .post('http://3.92.199.165/:3000/chat/message', text, { headers: { "Authorization": token } });
             showMyChatOnScreen(response.data.newMessage);
         }
         e.target.message.value = '';
@@ -71,7 +71,7 @@ async function getPublicChat() {
             lastMsgId = chatDetails[chatDetails.length - 1].id;
         }
 
-        const response = await axios.get(`http://localhost:3000/chat/get-chat?lastMsgId=${lastMsgId}`, { headers: { "Authorization": token } });
+        const response = await axios.get(`http://3.92.199.165/:3000/chat/get-chat?lastMsgId=${lastMsgId}`, { headers: { "Authorization": token } });
         const chatData = response.data.allChat;
 
         chatDetails.push(...chatData);
@@ -139,7 +139,7 @@ async function createGroup() {
         }
 
         const response = await axios
-            .post('http://localhost:3000/groups/create-group', groupDetails, { headers: { "Authorization": token } });
+            .post('http://3.92.199.165/:3000/groups/create-group', groupDetails, { headers: { "Authorization": token } });
 
         groupNameInput.value = '';
         showGroupNameList(response.data.newGroup);
@@ -153,7 +153,7 @@ async function createGroup() {
 async function getGroupList() {
     try {
         const response = await axios
-            .get('http://localhost:3000/groups/group-list', { headers: { "Authorization": token } });
+            .get('http://3.92.199.165/:3000/groups/group-list', { headers: { "Authorization": token } });
         const groupName = response.data.groupList;
         groupName.forEach((group) => {
             showGroupNameList(group);
@@ -215,7 +215,7 @@ async function deleteGroup(groupId) {
     try {
         if (confirm(`Are you sure want to delete this group?`)) {
             const response = await axios
-                .delete(`http://localhost:3000/groups/delete-group/${groupId}`, { headers: { "Authorization": token } });
+                .delete(`http://3.92.199.165/:3000/groups/delete-group/${groupId}`, { headers: { "Authorization": token } });
             showPopupMessage(response.data.message, response.data.success);
             document.getElementById('groupNameList').removeChild(document.getElementById(groupId));
             await backToPublicChat();
@@ -246,7 +246,7 @@ async function getGroupChat(groupId, groupName) {
         var h2Element = document.querySelector('.chat-header h2').textContent = groupName;
         document.querySelector('.member-button').classList.remove('hidden');
 
-        const response = await axios.get(`http://localhost:3000/groups/group-chat/${groupId}`, { headers: { "Authorization": token } });
+        const response = await axios.get(`http://3.92.199.165/:3000/groups/group-chat/${groupId}`, { headers: { "Authorization": token } });
         const chatData = response.data.grpChat;
 
         chatData.forEach((chat) => {
@@ -269,7 +269,7 @@ async function addMember() {
         const groupId = JSON.parse(localStorage.getItem('groupData')).groupId;
         const memberData = { mobNum: mobNum, groupId: groupId };
         const response = await axios
-            .post('http://localhost:3000/groups/add-member', memberData, { headers: { "Authorization": token } });
+            .post('http://3.92.199.165/:3000/groups/add-member', memberData, { headers: { "Authorization": token } });
         showPopupMessage(response.data.message, response.data.success);
         document.getElementById('mobile').value = '';
         displayMemberListForAdmin(response.data.newMemberWithName);
@@ -284,7 +284,7 @@ async function getMembers() {
     try {
         const groupId = JSON.parse(localStorage.getItem('groupData')).groupId;
         const response = await axios
-            .get(`http://localhost:3000/groups/get-member/${groupId}`, {
+            .get(`http://3.92.199.165/:3000/groups/get-member/${groupId}`, {
                 headers: { "Authorization": token }
             });
         const allMembers = response.data.membersWithNames;
@@ -310,7 +310,7 @@ async function removeMember(memberId, memberName) {
         if (confirm(`Are you sure want to remove ${memberName} from this group?`)) {
             const groupId = JSON.parse(localStorage.getItem('groupData')).groupId;
             const response = await axios
-                .delete(`http://localhost:3000/groups/remove-member?userId=${memberId}&groupId=${groupId}`, { headers: { "Authorization": token } });
+                .delete(`http://3.92.199.165/:3000/groups/remove-member?userId=${memberId}&groupId=${groupId}`, { headers: { "Authorization": token } });
             showPopupMessage(response.data.message, response.data.success);
             document.getElementById('member-list').removeChild(document.getElementById(memberId));
         }
@@ -336,7 +336,7 @@ async function makeAdmin(userId) {
     try {
         const groupId = JSON.parse(localStorage.getItem('groupData')).groupId;
         const response = await axios
-            .post(`http://localhost:3000/groups/make-admin?userId=${userId}&groupId=${groupId}`, {}, { headers: { "Authorization": token } });
+            .post(`http://3.92.199.165/:3000/groups/make-admin?userId=${userId}&groupId=${groupId}`, {}, { headers: { "Authorization": token } });
         showPopupMessage(response.data.message, response.data.success);
 
         // Update button text to "remove admin"
@@ -354,7 +354,7 @@ async function removeAdmin(userId) {
         if (confirm('Are you sure want to remove this member as admin?')) {
             const groupId = JSON.parse(localStorage.getItem('groupData')).groupId;
             const response = await axios
-                .post(`http://localhost:3000/groups/remove-admin?userId=${userId}&groupId=${groupId}`, {}, { headers: { "Authorization": token } });
+                .post(`http://3.92.199.165/:3000/groups/remove-admin?userId=${userId}&groupId=${groupId}`, {}, { headers: { "Authorization": token } });
             showPopupMessage(response.data.message, response.data.success);
 
             // Update button text to "make admin"
