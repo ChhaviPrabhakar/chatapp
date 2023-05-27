@@ -121,14 +121,19 @@ window.addEventListener('DOMContentLoaded', async () => {
 });
 
 
-// setInterval(async () => {
-//     const groupId = localStorage.getItem('groupId');
-//     if (groupId) {
-//         await getGroupChat();
-//     } else {
-//         await getChat();
-//     }
-// }, 6000);
+setInterval(async () => {
+    const groupData = localStorage.getItem('groupData');
+    if (groupData) {
+        const { groupId, groupName } = JSON.parse(groupData);
+        if (groupId) {
+            await getGroupChat(groupId, groupName);
+        } else {
+            await getPublicChat();
+        }
+    } else {
+        await getPublicChat();
+    }
+}, 2000);
 
 //create group
 async function createGroup() {
