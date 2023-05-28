@@ -134,14 +134,14 @@ exports.removeMember = async (req, res, next) => {
 
         const creator = await Group.findOne({ where: { id: groupId, createdBy: userId } });
 
-        if (creator.createdBy == req.user.id) {
-            await Group.update({ createdBy: null }, { where: { id: groupId } });
-            const creatorRemoved = await GroupMembership.destroy({ where: { userId: req.user.id, groupId: groupId } });
-            return res.status(200).json({ creatorRemoved, message: 'Successfully removed yourself from this group', success: true });
-        }
-
         if (creator) {
-            return res.status(401).json({ message: `Can't remove the Creator of this group!`, success: false });
+            if (creator.createdBy == req.user.id) {
+                await Group.update({ createdBy: null }, { where: { id: groupId } });
+                const creatorRemoved = await GroupMembership.destroy({ where: { userId: req.user.id, groupId: groupId } });
+                return res.status(200).json({ creatorRemoved, message: 'Successfully removed yourself from this group', success: true });
+            } else {
+                return res.status(401).json({ message: `Can't remove the Creator of this group!`, success: false });
+            }
         }
 
         const removedMember = await GroupMembership.destroy({ where: { userId: userId, groupId: groupId } });
