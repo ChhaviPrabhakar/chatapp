@@ -76,7 +76,7 @@ async function getPublicChat() {
 
         chatDetails.push(...chatData);
 
-        if (chatDetails.length > 10) {
+        if (chatDetails.length > 100) {
             chatDetails = chatDetails.slice(chatDetails.length - 10);
         }
 
@@ -122,16 +122,23 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 
 setInterval(async () => {
-    const groupData = localStorage.getItem('groupData');
-    if (groupData) {
-        const { groupId, groupName } = JSON.parse(groupData);
-        if (groupId) {
-            await getGroupChat(groupId, groupName);
+    try {
+        const groupData = localStorage.getItem('groupData');
+        if (groupData) {
+            const { groupId, groupName } = JSON.parse(groupData);
+            if (groupId) {
+                await getGroupChat(groupId, groupName);
+                await getGroupList();
+            } else {
+                await getPublicChat();
+                await getGroupList();
+            }
         } else {
             await getPublicChat();
+            await getGroupList();
         }
-    } else {
-        await getPublicChat();
+    } catch (err) {
+        console.log(err);
     }
 }, 2000);
 
@@ -160,6 +167,10 @@ async function getGroupList() {
         const response = await axios
             .get('http://3.92.199.165:3000/groups/group-list', { headers: { "Authorization": token } });
         const groupName = response.data.groupList;
+
+        let parentNode = document.getElementById('groupNameList');
+        parentNode.innerHTML = ''; // clear existing HTML content
+
         groupName.forEach((group) => {
             showGroupNameList(group);
         });
@@ -175,7 +186,7 @@ function showOthersChatOnScreen(chat) {
         <div class="message received">
                     <div class="message-info">
                         <span class="message-sender">${chat.user.name} -</span>
-                        <span class="message-time">${chat.createdAt}</span>
+                        <span class="message-time">${getTimeFromTimestamp(chat.createdAt)} - ${getDateFromTimestamp(chat.createdAt)}</span>
                     </div>
                     <div class="message-text">
                         ${chat.message}
@@ -192,7 +203,7 @@ function showMyChatOnScreen(chat) {
         <div class="message sent">
                 <div class="message-info">
                     <span class="message-sender">Me -</span>
-                    <span class="message-time">10:32 AM</span>
+                    <span class="message-time">${getTimeFromTimestamp(chat.createdAt)} - ${getDateFromTimestamp(chat.createdAt)}</span>
                 </div>
                 <div class="message-text">
                     ${chat.message}
@@ -251,8 +262,12 @@ async function getGroupChat(groupId, groupName) {
         var h2Element = document.querySelector('.chat-header h2').textContent = groupName;
         document.querySelector('.member-button').classList.remove('hidden');
 
-        const response = await axios.get(`http://3.92.199.165:3000/groups/group-chat/${groupId}`, { headers: { "Authorization": token } });
+        const response = await axios
+            .get(`http://3.92.199.165:3000/groups/group-chat/${groupId}`, { headers: { "Authorization": token } });
         const chatData = response.data.grpChat;
+
+        let parentNode = document.getElementById('chats');
+        parentNode.innerHTML = ''; // clear existing HTML content
 
         chatData.forEach((chat) => {
             if (currentUserId === chat.userId) {
@@ -523,4 +538,21 @@ function showPopupMessage(message, success) {
     setTimeout(() => {
         popup.remove();
     }, 2000);
+}
+
+function getTimeFromTimestamp(timestamp) {
+    return new Date(timestamp).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+}
+
+function getDateFromTimestamp(timestamp) {
+    const currentDate = new Date();
+    const inputDate = new Date(timestamp);
+
+    if (inputDate.toDateString() === currentDate.toDateString()) {
+        return 'Today';
+    } else if (inputDate.toDateString() === new Date(currentDate.getTime() - 24 * 60 * 60 * 1000).toDateString()) {
+        return 'Yesterday';
+    } else {
+        return inputDate.toISOString().split('T')[0];
+    }
 }
