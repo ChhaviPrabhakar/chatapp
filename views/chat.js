@@ -1,3 +1,9 @@
+// //Socket.io
+// const socket = io('http://localhost:3000');
+// // socket.on('connect', () => {
+// //     console.log(socket.id);
+// // });
+
 const token = localStorage.getItem('token');
 const decodeToken = parseJwt(token);
 const currentUserId = decodeToken.userId;
@@ -38,14 +44,14 @@ async function sendMessages(e) {
                 groupId: groupId
             }
             const response = await axios
-                .post('http://3.92.199.165:3000/chat/message', groupText, { headers: { "Authorization": token } });
+                .post('http://localhost:3000/chat/message', groupText, { headers: { "Authorization": token } });
             showMyChatOnScreen(response.data.newMsgInGrp);
         } else { //otherwise sent to public chat
             const text = {
                 message: e.target.message.value
             }
             const response = await axios
-                .post('http://3.92.199.165:3000/chat/message', text, { headers: { "Authorization": token } });
+                .post('http://localhost:3000/chat/message', text, { headers: { "Authorization": token } });
             showMyChatOnScreen(response.data.newMessage);
         }
         e.target.message.value = '';
@@ -71,7 +77,7 @@ async function getPublicChat() {
             lastMsgId = chatDetails[chatDetails.length - 1].id;
         }
 
-        const response = await axios.get(`http://3.92.199.165:3000/chat/get-chat?lastMsgId=${lastMsgId}`, { headers: { "Authorization": token } });
+        const response = await axios.get(`http://localhost:3000/chat/get-chat?lastMsgId=${lastMsgId}`, { headers: { "Authorization": token } });
         const chatData = response.data.allChat;
 
         chatDetails.push(...chatData);
@@ -121,26 +127,26 @@ window.addEventListener('DOMContentLoaded', async () => {
 });
 
 //for realtimechat
-setInterval(async () => {
-    try {
-        const groupData = localStorage.getItem('groupData');
-        if (groupData) {
-            const { groupId, groupName } = JSON.parse(groupData);
-            if (groupId) {
-                await getGroupChat(groupId, groupName);
-                await getGroupList();
-            } else {
-                await getPublicChat();
-                await getGroupList();
-            }
-        } else {
-            await getPublicChat();
-            await getGroupList();
-        }
-    } catch (err) {
-        console.log(err);
-    }
-}, 2000);
+// setInterval(async () => {
+//     try {
+//         const groupData = localStorage.getItem('groupData');
+//         if (groupData) {
+//             const { groupId, groupName } = JSON.parse(groupData);
+//             if (groupId) {
+//                 await getGroupChat(groupId, groupName);
+//                 await getGroupList();
+//             } else {
+//                 await getPublicChat();
+//                 await getGroupList();
+//             }
+//         } else {
+//             await getPublicChat();
+//             await getGroupList();
+//         }
+//     } catch (err) {
+//         console.log(err);
+//     }
+// }, 2000);
 
 //create group
 async function createGroup() {
@@ -151,7 +157,7 @@ async function createGroup() {
         }
 
         const response = await axios
-            .post('http://3.92.199.165:3000/groups/create-group', groupDetails, { headers: { "Authorization": token } });
+            .post('http://localhost:3000/groups/create-group', groupDetails, { headers: { "Authorization": token } });
 
         groupNameInput.value = '';
         showGroupNameList(response.data.newGroup);
@@ -165,7 +171,7 @@ async function createGroup() {
 async function getGroupList() {
     try {
         const response = await axios
-            .get('http://3.92.199.165:3000/groups/group-list', { headers: { "Authorization": token } });
+            .get('http://localhost:3000/groups/group-list', { headers: { "Authorization": token } });
         const groupName = response.data.groupList;
 
         let parentNode = document.getElementById('groupNameList');
@@ -231,7 +237,7 @@ async function deleteGroup(groupId) {
     try {
         if (confirm(`Are you sure want to delete this group?`)) {
             const response = await axios
-                .delete(`http://3.92.199.165:3000/groups/delete-group/${groupId}`, { headers: { "Authorization": token } });
+                .delete(`http://localhost:3000/groups/delete-group/${groupId}`, { headers: { "Authorization": token } });
             showPopupMessage(response.data.message, response.data.success);
             document.getElementById('groupNameList').removeChild(document.getElementById(groupId));
             await backToPublicChat();
@@ -263,7 +269,7 @@ async function getGroupChat(groupId, groupName) {
         document.querySelector('.member-button').classList.remove('hidden');
 
         const response = await axios
-            .get(`http://3.92.199.165:3000/groups/group-chat/${groupId}`, { headers: { "Authorization": token } });
+            .get(`http://localhost:3000/groups/group-chat/${groupId}`, { headers: { "Authorization": token } });
         const chatData = response.data.grpChat;
 
         let parentNode = document.getElementById('chats');
@@ -289,7 +295,7 @@ async function addMember() {
         const groupId = JSON.parse(localStorage.getItem('groupData')).groupId;
         const memberData = { mobNum: mobNum, groupId: groupId };
         const response = await axios
-            .post('http://3.92.199.165:3000/groups/add-member', memberData, { headers: { "Authorization": token } });
+            .post('http://localhost:3000/groups/add-member', memberData, { headers: { "Authorization": token } });
         showPopupMessage(response.data.message, response.data.success);
         document.getElementById('mobile').value = '';
         displayMemberListForAdmin(response.data.newMemberWithName);
@@ -304,7 +310,7 @@ async function getMembers() {
     try {
         const groupId = JSON.parse(localStorage.getItem('groupData')).groupId;
         const response = await axios
-            .get(`http://3.92.199.165:3000/groups/get-member/${groupId}`, {
+            .get(`http://localhost:3000/groups/get-member/${groupId}`, {
                 headers: { "Authorization": token }
             });
         const allMembers = response.data.membersWithNames;
@@ -330,7 +336,7 @@ async function removeMember(memberId, memberName) {
         const confirmResult = confirm(`Are you sure want to remove ${memberName} from this group?`);
         if (confirmResult) {
             const groupId = JSON.parse(localStorage.getItem('groupData')).groupId;
-            const response = await axios.delete(`http://3.92.199.165:3000/groups/remove-member?userId=${memberId}&groupId=${groupId}`, {
+            const response = await axios.delete(`http://localhost:3000/groups/remove-member?userId=${memberId}&groupId=${groupId}`, {
                 headers: { "Authorization": token }
             });
             showPopupMessage(response.data.message, response.data.success);
@@ -364,7 +370,7 @@ async function makeAdmin(userId) {
     try {
         const groupId = JSON.parse(localStorage.getItem('groupData')).groupId;
         const response = await axios
-            .post(`http://3.92.199.165:3000/groups/make-admin?userId=${userId}&groupId=${groupId}`, {}, { headers: { "Authorization": token } });
+            .post(`http://localhost:3000/groups/make-admin?userId=${userId}&groupId=${groupId}`, {}, { headers: { "Authorization": token } });
         showPopupMessage(response.data.message, response.data.success);
 
         // Update button text to "remove admin"
@@ -382,7 +388,7 @@ async function removeAdmin(userId) {
         if (confirm('Are you sure want to remove this member as admin?')) {
             const groupId = JSON.parse(localStorage.getItem('groupData')).groupId;
             const response = await axios
-                .post(`http://3.92.199.165:3000/groups/remove-admin?userId=${userId}&groupId=${groupId}`, {}, { headers: { "Authorization": token } });
+                .post(`http://localhost:3000/groups/remove-admin?userId=${userId}&groupId=${groupId}`, {}, { headers: { "Authorization": token } });
             showPopupMessage(response.data.message, response.data.success);
 
             // Update button text to "make admin"
@@ -564,3 +570,26 @@ function getDateFromTimestamp(timestamp) {
         return inputDate.toISOString().split('T')[0];
     }
 }
+
+
+const selectButton = document.getElementById('select-button');
+const input = document.getElementById('photo-input');
+
+selectButton.addEventListener('click', () => {
+    input.click();
+});
+
+input.addEventListener('change', async () => {
+    const file = input.files[0];
+
+    if (file) {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await axios
+            .post('http://localhost:3000/chat/multimedia', formData, { headers: { 'Authorization': token } });
+        console.log(response.data.fileUrl);
+    } else {
+        console.log('No file selected.');
+    }
+});
