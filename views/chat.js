@@ -38,9 +38,16 @@ async function sendMessages(e) {
         const groupData = JSON.parse(localStorage.getItem('groupData'));
         const groupId = groupData ? groupData.groupId : null;
 
+        // Get the user's input message
+        const userMessage = e.target.message.value;
+        // Get the link's HTML from the data-link attribute
+        const linkHtml = messageInput.dataset.link;
+        // Create a full message that includes the user's message and the link's HTML if it exists
+        const fullMessage = linkHtml ? `${userMessage}\n\n${linkHtml}` : userMessage;
+
         if (groupId) { //if groupId exist in LS, sent to group chat
             const groupText = {
-                message: e.target.message.value,
+                message: fullMessage,
                 groupId: groupId
             }
             const response = await axios
@@ -48,13 +55,14 @@ async function sendMessages(e) {
             showMyChatOnScreen(response.data.newMsgInGrp);
         } else { //otherwise sent to public chat
             const text = {
-                message: e.target.message.value
+                message: fullMessage
             }
             const response = await axios
                 .post('http://localhost:3000/chat/message', text, { headers: { "Authorization": token } });
             showMyChatOnScreen(response.data.newMessage);
         }
         e.target.message.value = '';
+        e.target.message.dataset.link = '';
         scrollToBottom();
     } catch (err) {
         console.log(err);
@@ -126,7 +134,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-//for realtimechat
+// for realtimechat
 // setInterval(async () => {
 //     try {
 //         const groupData = localStorage.getItem('groupData');
@@ -146,7 +154,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 //     } catch (err) {
 //         console.log(err);
 //     }
-// }, 2000);
+// }, 1000);
 
 //create group
 async function createGroup() {
@@ -574,6 +582,7 @@ function getDateFromTimestamp(timestamp) {
 
 const selectButton = document.getElementById('select-button');
 const input = document.getElementById('photo-input');
+const messageInput = document.getElementById('message');
 
 selectButton.addEventListener('click', () => {
     input.click();
@@ -583,13 +592,29 @@ input.addEventListener('change', async () => {
     const file = input.files[0];
 
     if (file) {
-        const formData = new FormData();
-        formData.append('file', file);
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
 
-        const response = await axios
-            .post('http://localhost:3000/chat/multimedia', formData, { headers: { 'Authorization': token } });
-        console.log(response.data.fileUrl);
+            const response = await axios
+                .post('http://localhost:3000/chat/multimedia', formData, {
+                    headers: {
+                        'Authorization': token,
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+
+            const fileUrl = response.data.fileUrl;
+            const link = document.createElement('a');
+            link.href = fileUrl;
+            link.textContent = 'File';
+
+            messageInput.dataset.link = link.outerHTML;
+            messageInput.value = 'File attached: ';
+        } catch (error) {
+            console.error('An error occurred:', error);
+        }
     } else {
-        console.log('No file selected.');
+        console.log('No file selected!');
     }
 });

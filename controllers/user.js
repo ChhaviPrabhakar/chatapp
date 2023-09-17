@@ -110,9 +110,9 @@ exports.forgotPswd = async (req, res, next) => {
                     subject: 'Reset your password',
                     sender,
                     to: recievers,
-                    // textContent: `Reset your password from this link :- http://3.92.199.165:3000/user/resetpasssword/${id}`
+                    // textContent: `Reset your password from this link :- http://localhost:3000/user/resetpasssword/${id}`
                     htmlContent: `<h1>Reset your password from this link</h1>
-                	<a href="http://3.92.199.165:3000/user/resetpassword/${id}">Reset password</a>`
+                	<a href="http://localhost:3000/user/resetpassword/${id}">Reset password</a>`
                     // params: {
                     //     role: 'frontend',
                     // },
@@ -134,7 +134,7 @@ exports.resetPswd = async (req, res, next) => {
     try {
         const reqId = req.params.id;
         const request = await ForgotPswd.findOne({ where: { id: reqId, isActive: true } });
-        if (request.id == reqId) {
+        if (request.id.toString() == reqId) {
             await request.update({ isActive: false });
             res.status(200).send(`<html>
                                     <script>
@@ -181,7 +181,24 @@ exports.updatepassword = async (req, res, next) => {
                     throw new Error(err);
                 }
                 await user.update({ password: hash });
-                res.status(201).json({ message: 'New password updated successfully!' });
+                // Construct the HTML response with the success message and redirection
+                const htmlResponse = `
+                    <html>
+                        <head>
+                            <meta http-equiv="refresh" content="3;url=/login.html">
+                        </head>
+                        <body>
+                            <h1>New password updated successfully!</h1>
+                            <p>You will be redirected to the login page in few seconds...</p>
+                            <script>
+                                setTimeout(function() {
+                                    window.location.href = "/login.html";
+                                }, 3000);
+                            </script>
+                        </body>
+                    </html>
+                `;
+                res.status(201).send(htmlResponse);
             });
         } else {
             res.status(404).json({ error: 'No user exist', success: false });

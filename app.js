@@ -1,5 +1,8 @@
 const express = require('express');
 const cors = require('cors');
+const http = require('http');
+const socketIO = require('socket.io');
+const fileUpload = require('express-fileupload');
 
 const sequelize = require('./util/database');
 const path = require('path');
@@ -11,9 +14,18 @@ const GroupMembership = require('./models/groupMembership');
 const ForgotPswd = require('./models/forgotPswd');
 
 const app = express();
+const server = http.createServer(app);
+const io = socketIO(server);
 
-app.use(cors()); //{ origin: "http://3.92.199.165:3000" }
+// io.on('connection', socket => {
+//     console.log('connected with sockedId= ', socket.id);
+// });
+
+app.use(cors({
+    origin: '*'
+}));
 app.use(express.json());
+app.use(fileUpload());
 
 const userRoutes = require('./routes/user');
 const chatRoutes = require('./routes/chat');
@@ -41,7 +53,7 @@ Group.belongsToMany(User, { through: GroupMembership });
 
 sequelize.sync()  //{force: true}
     .then(result => {
-        app.listen(3000);
-        console.log('Server running on PORT - 3000');
+        server.listen(3000);
+        console.log('<<<< Server running on PORT - 3000 >>>>');
     })
     .catch(err => console.log(err));

@@ -185,6 +185,24 @@
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
+.chat-footer button[type="button"] {
+    background-color: #333;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    margin-right: 10px;
+}
+
+.chat-footer button[type="button"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+
 @media only screen and (max-width: 600px) {
     .chat-window {
         width: 100%;
@@ -804,4 +822,43 @@
 .failure {
     background-color: red;
     color: white;
+}
+
+.made-with-love {
+    position: fixed;
+    bottom: 10px;
+    right: 18px;
+    z-index: 1000;
+    text-align: right;
+}
+
+.made-with-love span {
+    color: #666;
+    font-size: 15px;
+    display: inline-block;
+}
+
+.made-with-love a {
+    color: #000000;
+    text-decoration: none;
+}
+
+.made-with-love .fa {
+    color: #E90606;
+    margin: 0 3px;
+    font-size: 10px;
+    animation: pound .35s infinite alternate;
+    -webkit-animation: pound .35s infinite alternate;
+}
+
+@-webkit-keyframes pound {
+    to {
+        transform: scale(1.1);
+    }
+}
+
+@keyframes pound {
+    to {
+        transform: scale(1.1);
+    }
 }
